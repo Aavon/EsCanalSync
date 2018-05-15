@@ -22,7 +22,13 @@ import com.alibaba.otter.canal.protocol.Message;
 import com.alibaba.otter.es.TransportHelper;
 import com.alibaba.otter.exception.ClientException;
 import com.alibaba.otter.index.AbstractEsIndex;
+import com.alibaba.otter.index.ChatInfo;
+import com.alibaba.otter.index.DocumentInfo;
+import com.alibaba.otter.index.ProjectInfo;
+import com.alibaba.otter.index.ScheduleInfo;
+import com.alibaba.otter.index.TaskInfo;
 import com.alibaba.otter.index.UserInfo;
+import com.alibaba.otter.index.UserMembers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.alibaba.otter.MessageUtil;
@@ -89,20 +95,63 @@ public class EsClientHandler extends AbstractClientHandler {
 		if (debuging) {			
 			MessageUtil.printEntry(entries);
 		}
-		// 处理得到index list
+		// 处理得到修改的记录
 		for( Entry entry : entries) {
 			String fullName = entry.getHeader().getSchemaName() +"."+ entry.getHeader().getTableName();
-			AbstractEsIndex index = null;
+			List<AbstractEsIndex> newIndexs = null;
 			switch(fullName) {
-			case "user_table.user_infos":
-				index = new UserInfo();
-				index.transfer(entry);
+			case "zcloud_task.task_infos":
+				try {
+					newIndexs = TransportHelper.transfer(entry,TaskInfo.class);
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
 				break;
-			// add your own table	
-			
+			case "zcloud_project.project_infos":
+				try {
+					newIndexs = TransportHelper.transfer(entry,ProjectInfo.class);
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				break;
+			case "zcloud_document.document_infos":
+				try {
+					newIndexs = TransportHelper.transfer(entry,DocumentInfo.class);
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				break;
+			case "zcloud_imessage.multi_chats":
+				try {
+					newIndexs = TransportHelper.transfer(entry,ChatInfo.class);
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				break;	
+			case "zcloud_schedule.schedule_infos":
+				try {
+					newIndexs = TransportHelper.transfer(entry,ScheduleInfo.class);
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				break;	
+			case "zcloud_user.user_infos":
+				try {
+					newIndexs = TransportHelper.transfer(entry,UserInfo.class);
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				break;	
+			case "zcloud_organization.member_infos":
+				try {
+					newIndexs = TransportHelper.transfer(entry,UserMembers.class);
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				break;
 			}
-			if (index != null ) {
-				indexs.add(index);
+			if (newIndexs != null && newIndexs.size() > 0 ) {
+				indexs.addAll(newIndexs);
 			}
 		}
 		// api CURD

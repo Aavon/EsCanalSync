@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public abstract class AbstractEsIndex {
 	
 	@JsonIgnore
-	private Action action;
+	protected Action action;
 	
 	/**
 	 * 获取_id
@@ -53,43 +53,13 @@ public abstract class AbstractEsIndex {
 	@JsonIgnore
 	public abstract String getTypeName();
 	
+	
 	/**
-	 * 用Entry初始化index对象
-	 * 
-	 * @param entry
+	 * 获取父类型类型ID
+	 * @return
 	 */
-	public void transfer(Entry entry) {
-		// TODO Auto-generated method stub
-		if (entry.getEntryType() == EntryType.TRANSACTIONBEGIN || entry.getEntryType() == EntryType.TRANSACTIONEND) {
-            return;
-        }
-        
-        RowChange rowChage = null;
-        try {
-            rowChage = RowChange.parseFrom(entry.getStoreValue());
-        } catch (Exception e) {
-            throw new RuntimeException("ERROR ## parser of eromanga-event has an error , data:" + entry.toString(),
-                    e);
-        }
-
-        EventType eventType = rowChage.getEventType();
-        List<Column> cols = null;
-        for (RowData rowData : rowChage.getRowDatasList()) {
-            if (eventType == EventType.DELETE) {
-                // add
-            	this.action = Action.DELETE;
-            	cols = rowData.getBeforeColumnsList();
-            } else if (eventType == EventType.INSERT) {
-                // insert
-            	this.action = Action.UPSERT;
-            	cols = rowData.getAfterColumnsList();
-            } else {
-            	// update
-            	this.action = Action.UPDATE;
-            	cols = rowData.getAfterColumnsList();
-            }
-            IndexUtil.fieldMatch(this, cols);
-        }
+	@JsonIgnore
+	public String getParentId() {
+		return "";
 	}
-
 }
