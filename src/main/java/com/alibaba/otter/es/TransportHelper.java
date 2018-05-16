@@ -36,6 +36,10 @@ public class TransportHelper {
 			}
 			ObjectMapper mapper = new ObjectMapper();
 			for( AbstractEsIndex index : indexs ) {
+				// 过滤规则
+				if ( !index.Filter() ) {
+					continue;
+				}
 				byte[] docRaw = null;
 				docRaw = mapper.writeValueAsBytes(index);
 				switch( index.getAction() ) {
@@ -48,6 +52,7 @@ public class TransportHelper {
 					if (index.getParentId() != null && index.getParentId().length() > 0 ) {
 						iq0.parent(index.getParentId());
 					}
+					
 					bulkProcessor.add(iq0);
 					break;
 				case UPDATE:

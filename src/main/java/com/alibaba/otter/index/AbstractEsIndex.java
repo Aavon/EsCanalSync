@@ -62,4 +62,22 @@ public abstract class AbstractEsIndex {
 	public String getParentId() {
 		return "";
 	}
+	
+	/**
+	 * 获取路由，规划文档存放
+	 * @return
+	 */
+	@JsonIgnore
+	public String getRouting() {
+		return "";
+	}
+	
+	/**
+	 * 过滤规则
+	 * @return
+	 */
+	@JsonIgnore
+	public boolean Filter() {
+		return true;
+	}
 }
